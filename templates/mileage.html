@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h1 class="h4">Mileage Calculator</h1>
+
+    <p class="mb-2">
+      IRS standard business mileage rate detected: <strong>${{ "%.2f"|format(irs_rate) }}/mile</strong>
+    </p>
+
+    {% if ors_enabled %}
+      <div class="alert alert-info">
+        Distance auto-calc is ON (ORS_API_KEY configured). You can still override with manual miles.
+      </div>
+    {% else %}
+      <div class="alert alert-warning">
+        Distance auto-calc is OFF. Enter manual miles, or set ORS_API_KEY in Render environment variables.
+      </div>
+    {% endif %}
+
+    <form method="post" class="mt-3">
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Destination Start Address</label>
+          <input class="form-control" name="start_address" required>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Destination End Address</label>
+          <input class="form-control" name="end_address" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Trip Type</label>
+          <select class="form-select" name="trip_type">
+            <option value="one_way">One-way</option>
+            <option value="roundtrip">Roundtrip</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Manual One-way Miles (if needed)</label>
+          <input class="form-control" name="manual_one_way_miles" type="number" step="0.01" placeholder="e.g., 42.5">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Trip Start Date & Time</label>
+          <input class="form-control" name="start_datetime" type="datetime-local">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Destination Arrive Date & Time</label>
+          <input class="form-control" name="arrival_datetime" type="datetime-local">
+        </div>
+
+        <div class="col-12">
+          <hr class="my-2">
+          <h2 class="h6 mb-2">In Route Stops (Address + Time)</h2>
+          <p class="small opacity-75 mb-3">Enter up to 5 stops. These apply to both one-way and roundtrip.</p>
+        </div>
+
+        {% for i in range(1,6) %}
+          <div class="col-md-7">
+            <label class="form-label">Stop {{ i }} Location</label>
+            <input class="form-control" name="stop_{{ i }}_address" placeholder="Stop address">
+          </div>
+          <div class="col-md-5">
+            <label class="form-label">Stop {{ i }} Date & Time</label>
+            <input class="form-control" name="stop_{{ i }}_datetime" type="datetime-local">
+          </div>
+        {% endfor %}
+
+        <div class="col-md-6">
+          <label class="form-label">Manual Extra Miles (optional adjustment)</label>
+          <input class="form-control" name="manual_stop_miles" type="number" step="0.01" placeholder="e.g., 3.2">
+        </div>
+
+        <div class="col-12 d-flex gap-2 mt-2">
+          <button class="btn btn-success" type="submit">Save Trip</button>
+          <a class="btn btn-secondary" href="{{ url_for('index') }}">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

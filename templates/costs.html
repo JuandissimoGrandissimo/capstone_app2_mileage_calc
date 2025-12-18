@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="h4">Additional Costs</h1>
+<p class="opacity-75">Select a saved trip, then add Gas/Food/Tolls and optionally attach tickets.</p>
+
+{% if trips %}
+  <div class="row g-3">
+    {% for t in trips %}
+      <div class="col-12 col-lg-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h2 class="h6 mb-1">{{ "Roundtrip" if t.trip_type == "roundtrip" else "One-way" }}</h2>
+            <div class="small opacity-75 mb-2">{{ t.created_at }}</div>
+
+            <div class="mb-3">
+              <div><strong>Route:</strong> {{ t.start_address }} → {{ t.end_address }}</div>
+              <div><strong>Miles:</strong> {{ t.total_miles }}</div>
+              <div><strong>Reimbursement:</strong> ${{ "%.2f"|format(t.reimbursement) }}</div>
+            </div>
+
+            <form method="post" class="border-top pt-3">
+              <input type="hidden" name="created_at" value="{{ t.created_at }}">
+
+              <div class="row g-2">
+                <div class="col-4">
+                  <label class="form-label">Gas</label>
+                  <input class="form-control" name="gas" type="number" step="0.01" value="{{ t.costs.gas }}">
+                </div>
+                <div class="col-4">
+                  <label class="form-label">Food</label>
+                  <input class="form-control" name="food" type="number" step="0.01" value="{{ t.costs.food }}">
+                </div>
+                <div class="col-4">
+                  <label class="form-label">Tolls</label>
+                  <input class="form-control" name="tolls" type="number" step="0.01" value="{{ t.costs.tolls }}">
+                </div>
+
+                <div class="col-12 mt-2">
+                  <h3 class="h6">Law Enforcement Citation (Ticket)</h3>
+                  <p class="small opacity-75 mb-2">Add one ticket per submit (repeat to add more).</p>
+                </div>
+
+                <div class="col-6">
+                  <label class="form-label">State</label>
+                  <input class="form-control" name="ticket_state" placeholder="CA">
+                </div>
+                <div class="col-6">
+                  <label class="form-label">County</label>
+                  <input class="form-control" name="ticket_county" placeholder="Stanislaus">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Police Department</label>
+                  <input class="form-control" name="ticket_department" placeholder="CHP / City PD / Sheriff">
+                </div>
+                <div class="col-6">
+                  <label class="form-label">Citing Officer</label>
+                  <input class="form-control" name="ticket_officer" placeholder="Officer Name/Badge">
+                </div>
+                <div class="col-6">
+                  <label class="form-label">Ticket Number</label>
+                  <input class="form-control" name="ticket_number" placeholder="Citation #">
+                </div>
+
+                <div class="col-12 d-flex gap-2 mt-2">
+                  <button class="btn btn-primary" type="submit">Save Costs</button>
+                  <a class="btn btn-outline-secondary" href="{{ url_for('index') }}">Back</a>
+                </div>
+              </div>
+            </form>
+
+            {% if t.costs.tickets and t.costs.tickets|length > 0 %}
+              <div class="mt-3">
+                <strong>Tickets:</strong>
+                <ul class="mb-0">
+                  {% for tk in t.costs.tickets %}
+                    <li>
+                      {{ tk.ticket_number if tk.ticket_number else "Ticket" }} —
+                      {{ tk.department }}, {{ tk.county }}, {{ tk.state }} (Officer: {{ tk.citing_officer }})
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-secondary">No trips yet. Create one first.</div>
+{% endif %}
+
+{% endblock %}

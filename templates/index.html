@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="p-4 rounded-4 bg-dark shadow-sm">
+  <h1 class="h3 mb-2">Ready to Get Going on Your Trip</h1>
+  <p class="mb-0 opacity-75">
+    Create a trip in the Mileage Calculator, then add costs and tickets later.
+  </p>
+</div>
+
+<div class="d-flex gap-2 my-3">
+  <a class="btn btn-success" href="{{ url_for('mileage') }}">New Trip</a>
+  <a class="btn btn-info" href="{{ url_for('costs') }}">Add Costs</a>
+</div>
+
+{% if trips %}
+  <div class="row g-3">
+    {% for t in trips %}
+      <div class="col-12 col-lg-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h2 class="h5 mb-1">{{ "Roundtrip" if t.trip_type == "roundtrip" else "One-way" }}</h2>
+            <div class="small opacity-75 mb-2">Created: {{ t.created_at }}</div>
+
+            <div class="mb-2">
+              <div><strong>Start:</strong> {{ t.start_address }}</div>
+              <div><strong>End:</strong> {{ t.end_address }}</div>
+              <div class="mt-2">
+                <strong>Total Miles:</strong> {{ t.total_miles }} (source: {{ t.distance_source }})
+              </div>
+              <div>
+                <strong>IRS Rate:</strong> ${{ "%.2f"|format(t.irs_business_rate) }}/mile
+              </div>
+              <div>
+                <strong>Reimbursement:</strong> ${{ "%.2f"|format(t.reimbursement) }}
+              </div>
+            </div>
+
+            {% if t.stops and t.stops|length > 0 %}
+              <div class="mt-2">
+                <strong>Stops:</strong>
+                <ul class="mb-0">
+                  {% for s in t.stops %}
+                    <li>{{ s.address }} {% if s.datetime %} ({{ s.datetime }}){% endif %}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-secondary mt-3">No trips saved yet.</div>
+{% endif %}
+
+{% endblock %}
